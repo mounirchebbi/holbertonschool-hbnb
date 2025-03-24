@@ -6,7 +6,6 @@ HBnB is a web app designed for managing property rentals, allowing users to regi
 
 ### Directory Structure and Purpose
 
-    ```text
     hbnb/
     ├── app/
     │   ├── __init__.py
@@ -34,7 +33,7 @@ HBnB is a web app designed for managing property rentals, allowing users to regi
     ├── config.py
     ├── requirements.txt
     ├── README.md
-    ```
+
 
 
 ### File Descriptions

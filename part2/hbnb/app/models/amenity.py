@@ -1,0 +1,1 @@
+# app/models/amenity.py

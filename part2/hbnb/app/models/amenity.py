@@ -1,23 +1,15 @@
 # app/models/amenity.py
-import uuid
-from datetime import datetime
+from base_model import BaseModel
 
-class Amenity:
-    def __init__(self, name, description):
-        self.id = str(uuid.uuid4())
+class Amenity(BaseModel):
+    def __init__(self, name, description=""):
+        super().__init__()
         self.name = name
         self.description = description
-        self.created_at = datetime.now()
-        self.updated_at = self.created_at
     
     @classmethod
-    def create(cls, name, description):
+    def create(cls, name, description=""):
         return cls(name, description)
-    
-    def update(self, name, description):
-        self.name = name
-        self.description = description
-        self.updated_at = datetime.now()
     
     def to_dict(self):
         return {

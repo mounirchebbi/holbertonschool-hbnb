@@ -1,25 +1,26 @@
 # app/models/review.py
-import uuid
-from datetime import datetime
+from base_model import BaseModel
+from user import User
+from place import Place
 
-class Review:
-    def __init__(self, place_id, user_id, rating, comment):
-        self.id = str(uuid.uuid4())
-        self.place = place_id
-        self.user = user_id
+class Review(BaseModel):
+    def __init__(self, place, user, rating, text):
+        super().__init__()
+        if not isinstance(place, Place):
+            raise ValueError("Place must be a valid Place instance")
+        if not isinstance(user, User):
+            raise ValueError("User must be a valid User instance")
+        
+        self.place = place.id
+        self.user = user.id
         self.rating = int(rating)
-        self.comment = comment
-        self.created_at = datetime.now()
-        self.updated_at = self.created_at
-    
+        self.text = text
+
     @classmethod
-    def create(cls, place, user, rating, comment):
-        return cls(place, user, rating, comment)
-    
-    def update(self, rating, comment):
-        self.rating = int(rating)
-        self.comment = comment
-        self.updated_at = datetime.now()
+    def create(cls, place, user, rating, text):
+        review = cls(place, user, rating, text)
+        place.add_review(review)  # Maintain relationship
+        return review
     
     def to_dict(self):
         return {
@@ -27,8 +28,7 @@ class Review:
             'place': self.place,
             'user': self.user,
             'rating': self.rating,
-            'comment': self.comment,
+            'text': self.text,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }
-

@@ -1,5 +1,5 @@
 # app/models/amenity.py
-from base_model import BaseModel
+from .base_model import BaseModel
 
 class Amenity(BaseModel):
     def __init__(self, name, description=""):

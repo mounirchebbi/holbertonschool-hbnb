@@ -1,8 +1,8 @@
 # app/models/place.py
-from base_model import BaseModel
-from user import User
-from amenity import Amenity
-from review import Review
+from .base_model import BaseModel
+from .user import User
+from .amenity import Amenity
+from .review import Review
 
 class Place(BaseModel):
     def __init__(self, title, description, price, latitude, longitude, owner):

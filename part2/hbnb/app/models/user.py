@@ -1,5 +1,5 @@
 # app/models/user.py
-from base_model import BaseModel
+from .base_model import BaseModel
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(BaseModel):

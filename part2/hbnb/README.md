@@ -127,7 +127,7 @@ to_dict(): Serializes the amenity to a dictionary.
 
 ## Class usage examples:
 
-#User
+# User
 `create:`
 ```
 new_user = User.register(
@@ -147,7 +147,7 @@ new_user.update({
 })
 ```
 
-#Place
+# Place
 `create:`
 ```
 new_place = Place.create(
@@ -171,7 +171,7 @@ new_place.update({
 })
 ```
 
-#Review
+# Review
 `create:`
 ```
 
@@ -183,7 +183,7 @@ new_review = Review.create(
 )
 ```
 
-#Amenity
+# Amenity
 `create:`
 ```
 new_amenity = Amenity.create(

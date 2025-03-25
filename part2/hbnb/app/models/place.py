@@ -7,20 +7,29 @@ from review import Review
 class Place(BaseModel):
     def __init__(self, title, description, price, latitude, longitude, owner):
         super().__init__()
-        if not isinstance(owner, User):
-            raise ValueError("Owner must be a valid User instance")
         
         self.title = title
         self.description = description or ""
         self.price = float(price)
         self.latitude = float(latitude)
         self.longitude = float(longitude)
-        self.owner = owner.id  # Store owner ID as foreign key
-        self.amenities = [] # Place-amenities relationship
-        self.reviews = []  # Place-Review relationship
-
+        self.owner = owner.id  # Store owner ID instead of instance
+        self.amenities = []
+        self.reviews = []  # Added to manage Place-Review relationship
     @classmethod
     def create(cls, title, description, price, latitude, longitude, owner):
+        # validation
+        if len(title) > 100:
+            raise ValueError("Title must not exceed 100 characters")
+        if price < 0:
+            raise ValueError("Price must be positive")
+        if not (-90 <= latitude <= 90):
+            raise ValueError("Latitude must be between -90 and 90")
+        if not (-180 <= longitude <= 180):
+            raise ValueError("Longitude must be between -180 and 180")
+        if not isinstance(owner, User):
+            raise ValueError("Owner must be a valid User instance")
+
         return cls(title, description, price, latitude, longitude, owner)
     
     def add_amenity(self, amenity):
@@ -35,6 +44,9 @@ class Place(BaseModel):
             self.amenities.remove(amenity_id)
             self.save()
     
+    def get_amenities(self):
+        return self.amenities  #  fetch Amenity objects
+
     def add_review(self, review):
         if not isinstance(review, Review):
             raise ValueError("Must provide a valid Review instance")
@@ -42,9 +54,6 @@ class Place(BaseModel):
             raise ValueError("Review must belong to this place")
         self.reviews.append(review.id)
         self.save()
-
-    def get_amenities(self):
-        return self.amenities  #  fetch Amenity objects
     
     def get_reviews(self):
         return self.reviews  # fetch Review objects

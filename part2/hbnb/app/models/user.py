@@ -13,6 +13,12 @@ class User(BaseModel):
 
     @classmethod
     def register(cls, first_name, last_name, email, password):
+        # validation before instantiation
+        if len(first_name) > 50 or len(last_name) > 50:
+            raise ValueError("First name and last name must not exceed 50 characters")
+        if not email or not '@' in email:  # Basic email validation
+            raise ValueError("Invalid email format")
+
         return cls(first_name, last_name, email, password)
     
     def verify_password(self, password):

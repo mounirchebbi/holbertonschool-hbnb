@@ -6,10 +6,6 @@ from place import Place
 class Review(BaseModel):
     def __init__(self, place, user, rating, text):
         super().__init__()
-        if not isinstance(place, Place):
-            raise ValueError("Place must be a valid Place instance")
-        if not isinstance(user, User):
-            raise ValueError("User must be a valid User instance")
         
         self.place = place.id
         self.user = user.id
@@ -18,6 +14,17 @@ class Review(BaseModel):
 
     @classmethod
     def create(cls, place, user, rating, text):
+        #validation
+        
+        if not isinstance(place, Place):
+            raise ValueError("Place must be a valid Place instance")
+        if not isinstance(user, User):
+            raise ValueError("User must be a valid User instance")
+        if not 1 <= rating <= 5:
+            raise ValueError("Rating must be between 1 and 5")
+        if not text:
+            raise ValueError("Review text is required")
+
         review = cls(place, user, rating, text)
         place.add_review(review)  # Maintain relationship
         return review

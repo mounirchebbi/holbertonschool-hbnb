@@ -2,6 +2,7 @@
 from app.persistence.repository import InMemoryRepository
 from app.models.user import User
 from app.models.amenity import Amenity
+from app.models.place import Place
 from werkzeug.security import generate_password_hash
 
 class HBnBFacade:
@@ -70,7 +71,63 @@ class HBnBFacade:
         self.amenity_repo.update(amenity_id, update_data)
         return self.get_amenity(amenity_id)
 
-    # Placeholder method for fetching a place by ID
+
+    def create_place(self, place_data):
+        owner_id = place_data.get('owner_id')
+        owner = self.get_user(owner_id)
+        if not owner:
+            raise ValueError("Owner not found")
+
+        # Validate amenities
+        amenity_ids = place_data.get('amenities', [])
+        for amenity_id in amenity_ids:
+            if not self.get_amenity(amenity_id):
+                raise ValueError(f"Amenity with ID {amenity_id} not found")
+
+        # Create place
+        place = Place(
+            title=place_data['title'],
+            description=place_data.get('description', ''),
+            price=place_data['price'],
+            latitude=place_data['latitude'],
+            longitude=place_data['longitude'],
+            owner=owner
+        )
+        place.amenities = amenity_ids  # Assign validated amenity IDs
+        self.place_repo.add(place)
+        return place
+
     def get_place(self, place_id):
-        # Logic will be implemented in later tasks
-        pass
+        place = self.place_repo.get(place_id)
+        return place
+
+    def get_all_places(self):
+        return self.place_repo.get_all()
+
+    def update_place(self, place_id, place_data):
+        place = self.get_place(place_id)
+        if not place:
+            raise ValueError("Place not found")
+
+        # Validate owner if provided
+        if 'owner_id' in place_data:
+            owner = self.get_user(place_data['owner_id'])
+            if not owner:
+                raise ValueError("Owner not found")
+            place_data['owner'] = owner.id
+
+        # Validate amenities if provided
+        if 'amenities' in place_data:
+            amenity_ids = place_data['amenities']
+            for amenity_id in amenity_ids:
+                if not self.get_amenity(amenity_id):
+                    raise ValueError(f"Amenity with ID {amenity_id} not found")
+        
+        # Update only provided fields
+        update_data = {}
+        for key in ['title', 'description', 'price', 'latitude', 'longitude', 'owner', 'amenities']:
+            if key in place_data:
+                update_data[key] = place_data[key]
+
+        self.place_repo.update(place_id, update_data)
+        return self.get_place(place_id)

@@ -1,7 +1,6 @@
 # app/models/review.py
 from .base_model import BaseModel
 from .user import User
-from .place import Place
 
 class Review(BaseModel):
     def __init__(self, place, user, rating, text):
@@ -14,6 +13,7 @@ class Review(BaseModel):
 
     @classmethod
     def create(cls, place, user, rating, text):
+        from place import Place
         #validation
         
         if not isinstance(place, Place):

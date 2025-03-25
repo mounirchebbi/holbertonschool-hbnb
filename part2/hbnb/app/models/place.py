@@ -2,7 +2,6 @@
 from .base_model import BaseModel
 from .user import User
 from .amenity import Amenity
-from .review import Review
 
 class Place(BaseModel):
     def __init__(self, title, description, price, latitude, longitude, owner):
@@ -48,6 +47,7 @@ class Place(BaseModel):
         return self.amenities  #  fetch Amenity objects
 
     def add_review(self, review):
+        from review import Review
         if not isinstance(review, Review):
             raise ValueError("Must provide a valid Review instance")
         if review.place != self.id:

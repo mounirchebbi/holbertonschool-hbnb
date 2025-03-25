@@ -52,7 +52,7 @@ The business logic layer is implemented in the app/models/ directory and consist
 
 ## Entities and Responsibilities
 
-# BaseModel
+### BaseModel
 `description`: A base class providing common attributes and methods for all entities.
 `Attributes`:
 id (String): Unique identifier (UUID).
@@ -63,7 +63,7 @@ save(): Updates the updated_at timestamp.
 update(data): Updates attributes from a dictionary and calls save().
 `Responsibility`: Ensures all entities have consistent foundational behavior.
 
-# User
+### User
 `description`: Represents a user who can own places and write reviews.
 `Attributes`:
 first_name (String): Required, max 50 characters.
@@ -77,7 +77,7 @@ verify_password(password): Checks if a password matches the hash.
 to_dict(): Serializes the user to a dictionary.
 `Responsibility`: Manages user data, authentication, and serves as the owner of places or author of reviews.
 
-# Place
+### Place
 `description`: Represents a location (e.g., a rental property) owned by a user.
 `Attributes`:
 title (String): Required, max 100 characters.
@@ -98,7 +98,7 @@ get_reviews(): Returns the list of review IDs.
 to_dict(): Serializes the place to a dictionary.
 `Responsibility`: Manages place details, its amenities, and associated reviews, ensuring data integrity through validation.
 
-# Review
+### Review
 `description`: Represents a user’s review of a place.
 `Attributes`:
 place (String): ID of the reviewed Place.
@@ -110,7 +110,7 @@ create(): Class method to create a review and link it to the place + validation.
 to_dict(): Serializes the review to a dictionary.
 Responsibility: Captures feedback on a place, linking it to both a user and a place, with validation for rating and text.
 
-# Amenity
+### Amenity
 `description`: Represents a feature available at a place (e.g., Wi-Fi, parking).
 `Attributes`:
 name (String): Required, max 50 characters.
@@ -120,14 +120,14 @@ create(): Class method to instantiate an amenity + validation.
 to_dict(): Serializes the amenity to a dictionary.
 `Responsibility`: Defines reusable features that can be associated with multiple places.
 
-# Relationships
+## Relationships
 `User-Place`: One-to-many (a user can own multiple places).
 `Place-Review`: One-to-many (a place can have multiple reviews).
 `Place-Amenity`: Many-to-many (a place can have multiple amenities, and an amenity can belong to multiple places).
 
 ## Class usage examples:
 
-# User
+### User
 `create:`
 ```
 new_user = User.register(
@@ -147,7 +147,7 @@ new_user.update({
 })
 ```
 
-# Place
+### Place
 `create:`
 ```
 new_place = Place.create(
@@ -171,7 +171,7 @@ new_place.update({
 })
 ```
 
-# Review
+### Review
 `create:`
 ```
 
@@ -183,7 +183,7 @@ new_review = Review.create(
 )
 ```
 
-# Amenity
+### Amenity
 `create:`
 ```
 new_amenity = Amenity.create(

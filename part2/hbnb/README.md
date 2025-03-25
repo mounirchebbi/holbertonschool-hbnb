@@ -129,21 +129,27 @@ to_dict(): Serializes the amenity to a dictionary.
 
 #User
 `create:`
+```
 new_user = User.register(
     first_name="Alice",
     last_name="Smith",
     email="alice.smith@example.com",
     password="securepass123"
 )
+```
+
 `update:`
+```
 new_user.update({
     "first_name": "Alicia",
     "last_name": "Smithson",
     "email": "alicia.smithson@example.com"
 })
+```
 
 #Place
-`create`
+`create:`
+```
 new_place = Place.create(
     title="Cozy Cottage",
     description="A lovely retreat in the woods",
@@ -152,7 +158,10 @@ new_place = Place.create(
     longitude=-78.901,
     owner=new_user  # Pass the User instance created above
 )
-`update`
+```
+
+`update:`
+```
 new_place.update({
     "title": "Luxury Cozy Cottage",
     "description": "A luxurious retreat with modern amenities",
@@ -160,24 +169,30 @@ new_place.update({
     "latitude": 45.679,
     "longitude": -78.902
 })
+```
 
 #Review
-`create`
+`create:`
+```
+
 new_review = Review.create(
     place=new_place,  # Pass the Place instance
     user=new_user,    # Pass the User instance
     rating=4,
     text="Really enjoyed the stay, great location!"
 )
+```
 
 #Amenity
-`create`
+`create:`
+```
 new_amenity = Amenity.create(
     name="Wi-Fi",
     description="High-speed internet access"
 )
 "Add the amenity to the place"
 new_place.add_amenity(new_amenity)
+```
 
 
 ## Installation and Running

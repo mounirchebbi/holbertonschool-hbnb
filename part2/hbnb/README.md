@@ -66,20 +66,27 @@ The business logic layer is implemented in the app/models/ directory and consist
 ### User
 `description`: Represents a user who can own places and write reviews.
 `Attributes`:
+```
 - first_name (String): Required, max 50 characters.
 - last_name (String): Required, max 50 characters.
 - email (String): Required, must be a valid email format.
 - password_hash (String): Hashed password for security.
 - is_admin (Boolean): Defaults to False.
+```
 `Methods`:
+```
 - register(): Class method to create a new user + validation.
 - verify_password(password): Checks if a password matches the hash.
 - to_dict(): Serializes the user to a dictionary.
+```
+
 `Responsibility`: Manages user data, authentication, and serves as the owner of places or author of reviews.
 
 ### Place
 `description`: Represents a location (e.g., a rental property) owned by a user.
 `Attributes`:
+```
+
 - title (String): Required, max 100 characters.
 - description (String): Optional description.
 - price (Float): Must be positive.
@@ -88,7 +95,11 @@ The business logic layer is implemented in the app/models/ directory and consist
 - owner (String): ID of the owning User.
 - amenities (List): List of Amenity IDs (many-to-many).
 - reviews (List): List of Review IDs (one-to-many).
+```
+
 `Methods`:
+```
+
 - create(): Class method to instantiate a place + validation.
 - add_amenity(amenity): Adds an amenity to the place.
 - remove_amenity(amenity_id): Removes an amenity.
@@ -96,28 +107,46 @@ The business logic layer is implemented in the app/models/ directory and consist
 - get_amenities(): Returns the list of amenity IDs.
 - get_reviews(): Returns the list of review IDs.
 - to_dict(): Serializes the place to a dictionary.
+```
+
 `Responsibility`: Manages place details, its amenities, and associated reviews, ensuring data integrity through validation.
 
 ### Review
 `description`: Represents a user’s review of a place.
 `Attributes`:
+```
+
 - place (String): ID of the reviewed Place.
 - user (String): ID of the authoring User.
 - rating (Integer): Between 1 and 5.
 - text (String): Required review content.
+```
+
 `Methods`:
+```
+
 - create(): Class method to create a review and link it to the place + validation.
 - to_dict(): Serializes the review to a dictionary.
+```
+
 - Responsibility: Captures feedback on a place, linking it to both a user and a place, with validation for rating and text.
 
 ### Amenity
 `description`: Represents a feature available at a place (e.g., Wi-Fi, parking).
 `Attributes`:
+```
+
 - name (String): Required, max 50 characters.
 - description (String): Optional description.
+```
+
 `Methods`:
+```
+
 - create(): Class method to instantiate an amenity + validation.
 - to_dict(): Serializes the amenity to a dictionary.
+```
+
 `Responsibility`: Defines reusable features that can be associated with multiple places.
 
 ## Relationships

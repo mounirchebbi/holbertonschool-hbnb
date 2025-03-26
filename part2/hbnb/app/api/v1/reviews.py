@@ -18,7 +18,7 @@ review_update_model = api.model('ReviewUpdate', {
     'rating': fields.Integer(description='Rating of the place (1-5)')
 })
 
-@api.route('/')
+@api.route('/reviews/')
 class ReviewList(Resource):
     @api.expect(review_model, validate=True)
     @api.response(201, 'Review successfully created')
@@ -38,7 +38,7 @@ class ReviewList(Resource):
         reviews = facade.get_all_reviews()
         return [review.to_dict() for review in reviews], 200
 
-@api.route('/<review_id>')
+@api.route('/reviews/<review_id>')
 class ReviewResource(Resource):
     @api.response(200, 'Review details retrieved successfully')
     @api.response(404, 'Review not found')
@@ -74,7 +74,6 @@ class ReviewResource(Resource):
             return {'error': 'Review not found'}, 404
         facade.delete_review(review_id)
         return {'message': 'Review deleted successfully'}, 200
-
 @api.route('/places/<place_id>/reviews')
 class PlaceReviewList(Resource):
     @api.response(200, 'List of reviews for the place retrieved successfully')

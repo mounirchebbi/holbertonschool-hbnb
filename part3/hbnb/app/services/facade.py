@@ -4,7 +4,6 @@ from app.models.user import User
 from app.models.amenity import Amenity
 from app.models.place import Place
 from app.models.review import Review
-from werkzeug.security import generate_password_hash
 
 class HBnBFacade:
     def __init__(self):
@@ -66,15 +65,13 @@ class HBnBFacade:
         if 'password' in user_data:
             if len(user_data['password']) < 6:
                 raise ValueError("Password must be at least 6 characters")
+            user.hash_password(user_data['password'])
 
         # Update only provided fields
         update_data = {}
         for key in ['first_name', 'last_name', 'email', 'is_admin']:
             if key in user_data:
-                update_data[key] = user_data[key]
-        if 'password' in user_data:
-            update_data['password_hash'] = generate_password_hash(user_data['password'])
-        
+                update_data[key] = user_data[key]        
         self.user_repo.update(user_id, update_data)
         return self.get_user(user_id)
 

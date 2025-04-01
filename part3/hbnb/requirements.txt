@@ -1,4 +1,4 @@
 # requirements.txt
 flask
 flask-restx
-Werkzeug
+flask-bcrypt

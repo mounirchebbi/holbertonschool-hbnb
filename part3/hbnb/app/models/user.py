@@ -1,6 +1,5 @@
 # app/models/user.py
 from .base_model import BaseModel
-from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(BaseModel):
     def __init__(self, first_name, last_name, email, password, is_admin=False):
@@ -8,11 +7,18 @@ class User(BaseModel):
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
-        self.password_hash = generate_password_hash(password)
+        self.hash_password(password)  # Hash the password on initialization
         self.is_admin = is_admin
+    
+    def hash_password(self, password):
+        """Hashes the password before storing it."""
+        from app import bcrypt  # Import bcrypt here to avoid circulatr import
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def verify_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        """Verifies if the provided password matches the hashed password."""
+        from app import bcrypt  # Import bcrypt here to avoid circulatr import
+        return bcrypt.check_password_hash(self.password, password)
 
     def to_dict(self):
         return {

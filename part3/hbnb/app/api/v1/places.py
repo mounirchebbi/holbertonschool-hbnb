@@ -37,19 +37,13 @@ class PlaceList(Resource):
     @api.response(400, 'Invalid input data')
     def post(self):
         """Register a new place"""
-        current_user = get_jwt_identity()
         place_data = api.payload
-
-        # Only the owner or an admin can create a place
-        if place_data['owner_id'] != current_user['id'] and not current_user['is_admin']:
-            return {'error': 'Unauthorized action'}, 403
-
         try:
             new_place = facade.create_place(place_data)
             return self._enrich_place_data(new_place), 201
         except ValueError as e:
             return {'error': str(e)}, 400
-
+        
     # Public endpoint, no JWT required
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
@@ -85,22 +79,19 @@ class PlaceResource(Resource):
     @api.response(400, 'Invalid input data')
     def put(self, place_id):
         """Update a place's information"""
-
         current_user = get_jwt_identity()
-        # Only the owner or an admin can update a place
-        if place.owner != current_user['id'] and not current_user['is_admin']:
-            return {'error': 'Unauthorized action'}, 403
-        
-        place_data = api.payload
         place = facade.get_place(place_id)
         if not place:
             return {'error': 'Place not found'}, 404
+        if place.owner != current_user['id']:
+            return {'error': 'Unauthorized action'}, 403
+        place_data = api.payload
         try:
             updated_place = facade.update_place(place_id, place_data)
             return self._enrich_place_data(updated_place), 200
         except ValueError as e:
             return {'error': str(e)}, 400
-
+        
     def _enrich_place_data(self, place):
         """Helper method to include owner and amenities details in the response."""
         owner = facade.get_user(place.owner)

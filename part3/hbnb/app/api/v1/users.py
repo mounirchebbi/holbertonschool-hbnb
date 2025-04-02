@@ -25,6 +25,7 @@ user_update_model = api.model('UserUpdate', {
 
 @api.route('/')
 class UserList(Resource):
+    #Create user no jwt required
     @api.expect(user_model, validate=True)
     @api.response(201, 'User successfully created')
     @api.response(400, 'Email already registered')

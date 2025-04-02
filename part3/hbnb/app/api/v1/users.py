@@ -1,6 +1,7 @@
 # app/api/v1/users.py
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api = Namespace('users', description='User operations')
 
@@ -46,23 +47,39 @@ class UserList(Resource):
 
 @api.route('/<string:user_id>')
 class UserResource(Resource):
+    @jwt_required()
     @api.response(200, 'User details retrieved')
     @api.response(404, 'User not found')
     def get(self, user_id):
-        user = facade.get_user(user_id)
+        current_user = get_jwt_identity()  # {'id': user_id, 'is_admin': bool}
+        user = facade.get_user(user_id)    # user by id / current user by jwt
         if not user:
             return {'error': 'User not found'}, 404
+        # Only allow users to see their own data or admins to see any data
+        if current_user['id'] != user_id and not current_user['is_admin']:
+            return {'error': 'Unauthorized access'}, 403
         return user.to_dict(), 200
 
+    @jwt_required()
     @api.expect(user_update_model, validate=True)
     @api.response(200, 'User successfully updated')
     @api.response(400, 'Invalid input data')
     @api.response(404, 'User not found')
     def put(self, user_id):
+        current_user = get_jwt_identity()
         user_data = api.payload
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
+
+        # Only allow users to update their own data or admins to update any data
+        if current_user['id'] != user_id and not current_user['is_admin']:
+            return {'error': 'Unauthorized access'}, 403
+        # Prevent non-admins from changing is_admin status
+        user_data = api.payload
+        if 'is_admin' in user_data and not current_user['is_admin']:
+            return {'error': 'Only admins can modify admin status'}, 403
+
         try:
             updated_user = facade.update_user(user_id, user_data)
             return updated_user.to_dict(), 200

@@ -25,13 +25,19 @@ user_update_model = api.model('UserUpdate', {
 
 @api.route('/')
 class UserList(Resource):
-    #Create user no jwt required
+    @jwt_required()
     @api.expect(user_model, validate=True)
     @api.response(201, 'User successfully created')
     @api.response(400, 'Email already registered')
     @api.response(400, 'Invalid input data')
     def post(self):
         user_data = api.payload
+
+        #Check if current user is admin
+        current_user = get_jwt_identity()
+        if not current_user.get('is_admin'):
+            return {'error': 'Admin privileges required'}, 403
+        
         # Check email uniqueness
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
@@ -48,17 +54,12 @@ class UserList(Resource):
 
 @api.route('/<string:user_id>')
 class UserResource(Resource):
-    @jwt_required()
     @api.response(200, 'User details retrieved')
     @api.response(404, 'User not found')
     def get(self, user_id):
-        current_user = get_jwt_identity()  # {'id': user_id, 'is_admin': bool}
-        user = facade.get_user(user_id)    # user by id / current user by jwt
+        user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
-        # Only allow users to see their own data or admins to see any data
-        if current_user['id'] != user_id and not current_user['is_admin']:
-            return {'error': 'Unauthorized action'}, 403
         return user.to_dict(), 200
 
     @jwt_required()
@@ -67,14 +68,23 @@ class UserResource(Resource):
     @api.response(400, 'Invalid input data')
     @api.response(404, 'User not found')
     def put(self, user_id):
+
         current_user = get_jwt_identity()
-        if user_id != current_user['id']:
-            return {'error': 'Unauthorized action'}, 403
-
+        is_admin = current_user.get('is_admin', False)
         user_data = api.payload
-        if 'email' in user_data or 'password' in user_data:
-            return {'error': 'You cannot modify email or password'}, 400
-
+        
+        # If not admin, restrict to self-modification with limited fields
+        if not is_admin:
+            if user_id != current_user['id']:
+                return {'error': 'Unauthorized action'}, 403
+            if 'email' in user_data or 'password' in user_data:
+                return {'error': 'You cannot modify email or password'}, 400
+        # If admin, allow full modification
+        else:
+            if 'email' in user_data:
+                existing_user = facade.get_user_by_email(user_data['email'])
+                if existing_user and existing_user.id != user_id:
+                    return {'error': 'Email already in use'}, 400
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404

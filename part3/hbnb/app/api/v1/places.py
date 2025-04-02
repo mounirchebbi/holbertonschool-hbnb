@@ -31,12 +31,25 @@ place_model = api.model('Place', {
 
 @api.route('/')
 class PlaceList(Resource):
+    @jwt_required()
     @api.expect(place_model)
     @api.response(201, 'Place successfully created')
     @api.response(400, 'Invalid input data')
+    @api.response(403, 'Unauthorized action')
     def post(self):
         """Register a new place"""
+        current_user = get_jwt_identity()
+        is_admin = current_user.get('is_admin', False)
         place_data = api.payload
+
+        # For non-admins, owner_id must equals current_user id
+        if not is_admin:
+            if place_data['owner_id'] != current_user['id']:
+                return {'error': 'Unauthorized action'}, 403
+        # For admins, allow any owner_id but validate it exists
+        else:
+            if not facade.get_user(place_data['owner_id']):
+                return {'error': 'Owner not found'}, 400
         try:
             new_place = facade.create_place(place_data)
             return self._enrich_place_data(new_place), 201
@@ -74,6 +87,7 @@ class PlaceResource(Resource):
     @jwt_required()
     @api.expect(place_model)
     @api.response(200, 'Place updated successfully')
+    @api.response(403, 'Unauthorized action')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
     def put(self, place_id):
@@ -88,6 +102,14 @@ class PlaceResource(Resource):
             return {'error': 'Unauthorized action'}, 403
 
         place_data = api.payload
+
+        # For non-admins, prevent changing owner_id
+        if not is_admin and 'owner_id' in place_data and place_data['owner_id'] != place.owner:
+            return {'error': 'Unauthorized action'}, 403
+        # For admins, validate new owner_id if provided
+        if is_admin and 'owner_id' in place_data and not facade.get_user(place_data['owner_id']):
+            return {'error': 'Owner not found'}, 400
+        
         try:
             updated_place = facade.update_place(place_id, place_data)
             return self._enrich_place_data(updated_place), 200

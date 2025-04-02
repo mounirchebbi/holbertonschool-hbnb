@@ -1,6 +1,7 @@
 # app/api/v1/places.py
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api = Namespace('places', description='Place operations')
 
@@ -30,18 +31,26 @@ place_model = api.model('Place', {
 
 @api.route('/')
 class PlaceList(Resource):
+    @jwt_required()
     @api.expect(place_model)
     @api.response(201, 'Place successfully created')
     @api.response(400, 'Invalid input data')
     def post(self):
         """Register a new place"""
+        current_user = get_jwt_identity()
         place_data = api.payload
+
+        # Only the owner or an admin can create a place
+        if place_data['owner_id'] != current_user['id'] and not current_user['is_admin']:
+            return {'error': 'Unauthorized access'}, 403
+
         try:
             new_place = facade.create_place(place_data)
             return self._enrich_place_data(new_place), 201
         except ValueError as e:
             return {'error': str(e)}, 400
 
+    @jwt_required()
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
         """Retrieve a list of all places"""
@@ -59,6 +68,7 @@ class PlaceList(Resource):
 
 @api.route('/<place_id>')
 class PlaceResource(Resource):
+    @jwt_required()
     @api.response(200, 'Place details retrieved successfully')
     @api.response(404, 'Place not found')
     def get(self, place_id):
@@ -68,12 +78,19 @@ class PlaceResource(Resource):
             return {'error': 'Place not found'}, 404
         return self._enrich_place_data(place), 200
 
+    @jwt_required()
     @api.expect(place_model)
     @api.response(200, 'Place updated successfully')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
     def put(self, place_id):
         """Update a place's information"""
+        
+        current_user = get_jwt_identity()
+        # Only the owner or an admin can update a place
+        if place.owner != current_user['id'] and not current_user['is_admin']:
+            return {'error': 'Unauthorized access'}, 403
+        
         place_data = api.payload
         place = facade.get_place(place_id)
         if not place:

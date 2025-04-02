@@ -50,7 +50,7 @@ class PlaceList(Resource):
         except ValueError as e:
             return {'error': str(e)}, 400
 
-    @jwt_required()
+    # Public endpoint, no JWT required
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
         """Retrieve a list of all places"""
@@ -68,7 +68,7 @@ class PlaceList(Resource):
 
 @api.route('/<place_id>')
 class PlaceResource(Resource):
-    @jwt_required()
+    # Public endpoint, no JWT required
     @api.response(200, 'Place details retrieved successfully')
     @api.response(404, 'Place not found')
     def get(self, place_id):
@@ -85,7 +85,7 @@ class PlaceResource(Resource):
     @api.response(400, 'Invalid input data')
     def put(self, place_id):
         """Update a place's information"""
-        
+
         current_user = get_jwt_identity()
         # Only the owner or an admin can update a place
         if place.owner != current_user['id'] and not current_user['is_admin']:

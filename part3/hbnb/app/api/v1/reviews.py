@@ -32,7 +32,7 @@ class ReviewList(Resource):
 
         # Only the user or an admin can create a review for themselves
         if review_data['user_id'] != current_user['id'] and not current_user['is_admin']:
-            return {'error': 'Unauthorized access'}, 403
+            return {'error': 'Unauthorized action'}, 403
         
         try:
             new_review = facade.create_review(review_data)
@@ -73,7 +73,7 @@ class ReviewResource(Resource):
         
         # Only the review owner or an admin can update it
         if review.user != current_user['id'] and not current_user['is_admin']:
-            return {'error': 'Unauthorized access'}, 403
+            return {'error': 'Unauthorized action'}, 403
         
         try:
             updated_review = facade.update_review(review_id, review_data)
@@ -94,7 +94,7 @@ class ReviewResource(Resource):
         
         # Only the review owner or an admin can delete it
         if review.user != current_user['id'] and not current_user['is_admin']:
-            return {'error': 'Unauthorized access'}, 403
+            return {'error': 'Unauthorized action'}, 403
         
         facade.delete_review(review_id)
         return {'message': 'Review deleted successfully'}, 200

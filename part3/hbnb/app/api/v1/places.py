@@ -42,7 +42,7 @@ class PlaceList(Resource):
 
         # Only the owner or an admin can create a place
         if place_data['owner_id'] != current_user['id'] and not current_user['is_admin']:
-            return {'error': 'Unauthorized access'}, 403
+            return {'error': 'Unauthorized action'}, 403
 
         try:
             new_place = facade.create_place(place_data)
@@ -89,7 +89,7 @@ class PlaceResource(Resource):
         current_user = get_jwt_identity()
         # Only the owner or an admin can update a place
         if place.owner != current_user['id'] and not current_user['is_admin']:
-            return {'error': 'Unauthorized access'}, 403
+            return {'error': 'Unauthorized action'}, 403
         
         place_data = api.payload
         place = facade.get_place(place_id)

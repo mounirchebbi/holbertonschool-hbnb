@@ -28,7 +28,7 @@ class AmenityList(Resource):
         current_user = get_jwt_identity()
         # Only admins can create amenities
         if not current_user['is_admin']:
-            return {'error': 'Unauthorized access'}, 403
+            return {'error': 'Unauthorized action'}, 403
 
         amenity_data = api.payload
 
@@ -61,11 +61,11 @@ class AmenityResource(Resource):
     @api.response(400, 'Invalid input data')
     @api.response(404, 'Amenity not found')
     def put(self, amenity_id):
-        
+
         current_user = get_jwt_identity()
         # Only admins can update amenities
         if not current_user['is_admin']:
-            return {'error': 'Unauthorized access'}, 403
+            return {'error': 'Unauthorized action'}, 403
         
         amenity_data = api.payload
         amenity = facade.get_amenity(amenity_id)

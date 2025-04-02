@@ -57,7 +57,7 @@ class UserResource(Resource):
             return {'error': 'User not found'}, 404
         # Only allow users to see their own data or admins to see any data
         if current_user['id'] != user_id and not current_user['is_admin']:
-            return {'error': 'Unauthorized access'}, 403
+            return {'error': 'Unauthorized action'}, 403
         return user.to_dict(), 200
 
     @jwt_required()
@@ -67,19 +67,16 @@ class UserResource(Resource):
     @api.response(404, 'User not found')
     def put(self, user_id):
         current_user = get_jwt_identity()
+        if user_id != current_user['id']:
+            return {'error': 'Unauthorized action'}, 403
+
         user_data = api.payload
+        if 'email' in user_data or 'password' in user_data:
+            return {'error': 'You cannot modify email or password'}, 400
+
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
-
-        # Only allow users to update their own data or admins to update any data
-        if current_user['id'] != user_id and not current_user['is_admin']:
-            return {'error': 'Unauthorized access'}, 403
-        # Prevent non-admins from changing is_admin status
-        user_data = api.payload
-        if 'is_admin' in user_data and not current_user['is_admin']:
-            return {'error': 'Only admins can modify admin status'}, 403
-
         try:
             updated_user = facade.update_user(user_id, user_data)
             return updated_user.to_dict(), 200

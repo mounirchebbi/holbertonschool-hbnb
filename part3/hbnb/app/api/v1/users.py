@@ -30,14 +30,15 @@ class UserList(Resource):
     @api.response(201, 'User successfully created')
     @api.response(400, 'Email already registered')
     @api.response(400, 'Invalid input data')
+    @api.response(403, 'Admin privileges required')
     def post(self):
-        user_data = api.payload
 
         #Check if current user is admin
         current_user = get_jwt_identity()
         if not current_user.get('is_admin'):
             return {'error': 'Admin privileges required'}, 403
-        
+  
+        user_data = api.payload
         # Check email uniqueness
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
@@ -67,6 +68,7 @@ class UserResource(Resource):
     @api.response(200, 'User successfully updated')
     @api.response(400, 'Invalid input data')
     @api.response(404, 'User not found')
+    @api.response(403, 'Unauthorized action or Admin privileges required')
     def put(self, user_id):
 
         current_user = get_jwt_identity()

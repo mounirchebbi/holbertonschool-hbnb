@@ -1,5 +1,7 @@
 # app/models/user.py
 from .base_model import BaseModel
+from flask_bcrypt import Bcrypt  # Import directly from flask_bcrypt
+bcrypt = Bcrypt()  # Initialize bcrypt here
 
 class User(BaseModel):
     def __init__(self, first_name, last_name, email, password, is_admin=False):
@@ -12,12 +14,12 @@ class User(BaseModel):
     
     def hash_password(self, password):
         """Hashes the password before storing it."""
-        from app import bcrypt  # Import bcrypt here to avoid circulatr import
+        #from app import bcrypt  # Import bcrypt here to avoid circulatr import
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def verify_password(self, password):
         """Verifies if the provided password matches the hashed password."""
-        from app import bcrypt  # Import bcrypt here to avoid circulatr import
+        #from app import bcrypt  # Import bcrypt here to avoid circulatr import
         return bcrypt.check_password_hash(self.password, password)
 
     def to_dict(self):

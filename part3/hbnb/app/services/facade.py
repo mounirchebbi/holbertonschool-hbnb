@@ -1,5 +1,6 @@
 # app/services/facade.py
-from app.persistence.repository import InMemoryRepository
+
+from app.persistence.repository import SQLAlchemyRepository
 from app.models.user import User
 from app.models.amenity import Amenity
 from app.models.place import Place
@@ -7,10 +8,32 @@ from app.models.review import Review
 
 class HBnBFacade:
     def __init__(self):
-        self.user_repo = InMemoryRepository()
-        self.place_repo = InMemoryRepository()
-        self.review_repo = InMemoryRepository()
-        self.amenity_repo = InMemoryRepository()
+        self.user_repo = SQLAlchemyRepository(User)
+        self.place_repo = SQLAlchemyRepository(Place)
+        self.review_repo = SQLAlchemyRepository(Review)
+        self.amenity_repo = SQLAlchemyRepository(Amenity)
+
+        # Pre-population logic is commented out until database initialization is set up
+        """
+        # Pre-populate with an admin user
+        admin_user = User(
+            first_name="Admin",
+            last_name="User",
+            email="admin@example.com",
+            password="adminpass123",
+            is_admin=True
+        )
+        self.user_repo.add(admin_user)
+        # Pre-populate with a regular user
+        regular_user = User(
+            first_name="Regular",
+            last_name="User",
+            email="user@example.com",
+            password="password123",
+            is_admin=False
+        )
+        self.user_repo.add(regular_user)
+        """
 
     """User Facade"""
     def create_user(self, user_data):
@@ -48,7 +71,7 @@ class HBnBFacade:
         user = self.get_user(user_id)
         if not user:
             raise ValueError("User not found")
-        
+
         # Validate updated fields
         if 'first_name' in user_data:
             if not user_data['first_name'] or len(user_data['first_name']) > 50:
@@ -71,7 +94,7 @@ class HBnBFacade:
         update_data = {}
         for key in ['first_name', 'last_name', 'email', 'is_admin']:
             if key in user_data:
-                update_data[key] = user_data[key]        
+                update_data[key] = user_data[key]
         self.user_repo.update(user_id, update_data)
         return self.get_user(user_id)
 
@@ -110,7 +133,6 @@ class HBnBFacade:
         for key in ['name', 'description']:
             if key in amenity_data:
                 update_data[key] = amenity_data[key]
-        
         self.amenity_repo.update(amenity_id, update_data)
         return self.get_amenity(amenity_id)
 
@@ -185,7 +207,6 @@ class HBnBFacade:
         for key in ['title', 'description', 'price', 'latitude', 'longitude', 'owner', 'amenities']:
             if key in place_data:
                 update_data[key] = place_data[key]
-        
         self.place_repo.update(place_id, update_data)
         return self.get_place(place_id)
 
@@ -212,6 +233,7 @@ class HBnBFacade:
         review = Review(place.id, user.id, rating, text)
         self.review_repo.add(review)
         place.add_review(review.id)  # Maintain relationship
+        self.place_repo.update(place.id, {'reviews': place.reviews})  # Persist the updated reviews list
         return review
 
     def get_review(self, review_id):
@@ -244,7 +266,6 @@ class HBnBFacade:
         for key in ['text', 'rating']:
             if key in review_data:
                 update_data[key] = review_data[key]
-        
         self.review_repo.update(review_id, update_data)
         return self.get_review(review_id)
 
@@ -255,4 +276,5 @@ class HBnBFacade:
         place = self.get_place(review.place)
         if place and review_id in place.reviews:
             place.reviews.remove(review_id)  # Maintain relationship
+            self.place_repo.update(place.id, {'reviews': place.reviews})  # Persist the updated reviews list
         self.review_repo.delete(review_id)

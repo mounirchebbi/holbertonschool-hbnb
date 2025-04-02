@@ -23,6 +23,7 @@ class AmenityList(Resource):
     @api.expect(amenity_model, validate=True)
     @api.response(201, 'Amenity successfully created')
     @api.response(400, 'Invalid input data')
+    @api.response(403, 'Admin privileges required')
     def post(self):
 
         current_user = get_jwt_identity()
@@ -30,7 +31,6 @@ class AmenityList(Resource):
             return {'error': 'Admin privileges required'}, 403
         
         amenity_data = api.payload
-
         try:
             new_amenity = facade.create_amenity(amenity_data)
             return new_amenity.to_dict(), 201
@@ -57,6 +57,7 @@ class AmenityResource(Resource):
     @api.response(200, 'Amenity successfully updated')
     @api.response(400, 'Invalid input data')
     @api.response(404, 'Amenity not found')
+    @api.response(403, 'Admin privileges required')
     def put(self, amenity_id):
 
         current_user = get_jwt_identity()

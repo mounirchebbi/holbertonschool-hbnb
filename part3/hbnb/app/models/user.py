@@ -14,6 +14,10 @@ class User(BaseModel):
     password = db.Column(db.String(128), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
 
+    # Relationships
+    places = db.relationship('Place', backref='owner', lazy='dynamic')
+    reviews = db.relationship('Review', backref='author', lazy='dynamic')
+
     def __init__(self, first_name, last_name, email, password, is_admin=False):
         super().__init__()
         self.first_name = first_name

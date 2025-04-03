@@ -6,6 +6,8 @@ class Amenity(BaseModel):
     __tablename__ = 'amenities'
 
     name = db.Column(db.String(50), nullable=False)
+    # Relationships
+    # 'places' backref is defined in Place model
 
     def __init__(self, name, description=""):
         super().__init__()

@@ -1,4 +1,4 @@
-# app/persistence/review_repository.py
+# app/persistence/amenity_repository.py
 
 from app.models.amenity import Amenity
 from app.persistence.repository import SQLAlchemyRepository

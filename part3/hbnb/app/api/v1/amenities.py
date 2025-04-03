@@ -17,7 +17,7 @@ amenity_update_model = api.model('AmenityUpdate', {
     'description': fields.String(description='Description of the amenity')
 })
 
-@api.route('/')
+@api.route('')
 class AmenityList(Resource):
     @jwt_required()
     @api.expect(amenity_model, validate=True)

@@ -18,7 +18,7 @@ class Amenity(BaseModel):
         return {
             'id': self.id,
             'name': self.name,
-            'description': self.description,  # Included for compatibility
+            #'description': self.description,  # Included for compatibility
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }

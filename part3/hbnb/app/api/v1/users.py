@@ -23,7 +23,7 @@ user_update_model = api.model('UserUpdate', {
     'is_admin': fields.Boolean(description='Admin status of the user')
 })
 
-@api.route('/')
+@api.route('')
 class UserList(Resource):
     @jwt_required()
     @api.expect(user_model, validate=True)

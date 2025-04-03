@@ -11,33 +11,28 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from app.database import db  # Import db from the new module
 
-# Initialize extensions
+# Initialize Flask extensions
 bcrypt = Bcrypt()
 jwt = JWTManager()
-#db = SQLAlchemy()
 
+# Function to create and configure the Flask app
 def create_app(config_class="config.DevelopmentConfig"):
-
     app = Flask(__name__)
     app.config.from_object(config_class)
-
+    
     # Initialize extensions with the app
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
-
+    
+    # Set up the REST API with Flask-RESTX
     api = Api(app, version='1.0', title='HBnB API', description='HBnB Application API')
-
-    # Register the users namespace
+    
+    # Register API namespaces
     api.add_namespace(users_ns, path='/api/v1/users')
-    # Register the amenities namespace
     api.add_namespace(amenities_ns, path='/api/v1/amenities')
-    # Register the amenities namespace
     api.add_namespace(places_ns, path='/api/v1/places')
-    # Register the reviews namespace
     api.add_namespace(reviews_ns, path='/api/v1')
-    # Register login namespace
     api.add_namespace(login_ns, path='/api/v1')
-
-
+    
     return app

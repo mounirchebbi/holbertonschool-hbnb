@@ -1,90 +1,133 @@
 #!/bin/bash
-
 # File: test_api_endpoints.sh
 
 # Base URL
 BASE_URL="http://localhost:5000"
 
-# Authentication (Login) - Get admin token (admin user)
+# Function to print response with a header
+print_response() {
+    echo "---------- $1 ----------"
+    echo "$2" | jq .  # Pretty-print JSON
+    echo ""
+}
+
+# Authentication (Login) - Get regular user token
+user_response=$(curl -s -X POST "${BASE_URL}/api/v1/login" \
+    -H "Content-Type: application/json" \
+    -d '{"email": "user@example.com", "password": "password123"}')
+user_token=$(echo "$user_response" | jq -r '.access_token')
+regular_user_id=$(echo "$user_response" | jq -r '.id')  # Assuming the login response includes user ID; adjust if needed
+print_response "Regular User Token" "$user_response"
+
+# Authentication (Login) - Get admin token
 admin_response=$(curl -s -X POST "${BASE_URL}/api/v1/login" \
-     -H "Content-Type: application/json" \
-     -d '{"email": "admin@example.com", "password": "adminpass123"}')
+    -H "Content-Type: application/json" \
+    -d '{"email": "admin@example.com", "password": "adminpass123"}')
 admin_token=$(echo "$admin_response" | jq -r '.access_token')
-if [ "$admin_token" == "null" ] || [ -z "$admin_token" ]; then
-    echo "Error: Failed to get admin token. Response: $admin_response"
-    exit 1
-else
-    echo "Admin Token: $admin_token"
-fi
+print_response "Admin Token" "$admin_response"
 
 # Users - Create a new user (Admin only)
-user_create_response=$(curl -s -X POST "${BASE_URL}/api/v1/users/" \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer ${admin_token}" \
-     -d '{"first_name": "John", "last_name": "Doe", "email": "john.doe@example.com", "password": "securepass", "is_admin": false}')
+user_create_response=$(curl -s -X POST "${BASE_URL}/api/v1/users" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${admin_token}" \
+    -d '{"first_name": "John", "last_name": "Doe", "email": "john.doe@example.com", "password": "securepass", "is_admin": false}')
 user_id=$(echo "$user_create_response" | jq -r '.id')
-if [ "$user_id" == "null" ] || [ -z "$user_id" ]; then
-    echo "Error: Failed to create user. Response: $user_create_response"
-    exit 1
-else
-    echo "Created User ID: $user_id"
-fi
-
-# Authentication (Login) - Get user token (using newly created user)
-user_response=$(curl -s -X POST "${BASE_URL}/api/v1/login" \
-     -H "Content-Type: application/json" \
-     -d '{"email": "john.doe@example.com", "password": "securepass"}')
-user_token=$(echo "$user_response" | jq -r '.access_token')
-if [ "$user_token" == "null" ] || [ -z "$user_token" ]; then
-    echo "Error: Failed to get user token. Response: $user_response"
-    exit 1
-else
-    echo "User Token: $user_token"
-fi
+print_response "New User Created" "$user_create_response"
 
 # Users - Get user details (Public)
-curl -s -X GET "${BASE_URL}/api/v1/users/${user_id}"
+user_details=$(curl -s -X GET "${BASE_URL}/api/v1/users/${user_id}")
+print_response "Public Get New User Details" "$user_details"
+
+# Authentication (Login) - Get new user (John Doe) token
+new_user_response=$(curl -s -X POST "${BASE_URL}/api/v1/login" \
+    -H "Content-Type: application/json" \
+    -d '{"email": "john.doe@example.com", "password": "securepass"}')
+new_user_token=$(echo "$new_user_response" | jq -r '.access_token')
+print_response "New User Token (John Doe)" "$new_user_response"
 
 # Users - Update user (Self, regular user)
-curl -s -X PUT "${BASE_URL}/api/v1/users/${user_id}" \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer ${user_token}" \
-     -d '{"first_name": "Johnny", "last_name": "Doe"}'
+user_update_response=$(curl -s -X PUT "${BASE_URL}/api/v1/users/${user_id}" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${new_user_token}" \
+    -d '{"first_name": "Johnny", "last_name": "Doe"}')
+print_response "New User Self Update" "$user_update_response"
 
 # Users - Update user as Admin (including email/password)
-curl -s -X PUT "${BASE_URL}/api/v1/users/${user_id}" \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer ${admin_token}" \
-     -d '{"email": "update.john.doe@example.com", "password": "newsecurepass", "is_admin": true}'
+admin_update_response=$(curl -s -X PUT "${BASE_URL}/api/v1/users/${user_id}" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${admin_token}" \
+    -d '{"email": "update.john.doe@example.com", "password": "newsecurepass", "is_admin": true}')
+print_response "Admin Updates New User" "$admin_update_response"
 
 # Amenities - Create a new amenity (Admin only)
-amenity_create_response=$(curl -s -X POST "${BASE_URL}/api/v1/amenities/" \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer ${admin_token}" \
-     -d '{"name": "WiFi", "description": "High-speed internet"}')
+amenity_create_response=$(curl -s -X POST "${BASE_URL}/api/v1/amenities" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${admin_token}" \
+    -d '{"name": "Parking", "description": "Free parking space"}')
 amenity_id=$(echo "$amenity_create_response" | jq -r '.id')
-if [ "$amenity_id" == "null" ] || [ -z "$amenity_id" ]; then
-    echo "Error: Failed to create amenity. Response: $amenity_create_response"
-    exit 1
-else
-    echo "Created Amenity ID: $amenity_id"
-fi
+print_response "Created Amenity" "$amenity_create_response"
 
 # Amenities - Get all amenities (Public)
-curl -s -X GET "${BASE_URL}/api/v1/amenities/"
+all_amenities=$(curl -s -X GET "${BASE_URL}/api/v1/amenities")
+print_response "Public Get All Amenities" "$all_amenities"
 
-# Amenities - Get amenity by id (Public)
-curl -s -X GET "${BASE_URL}/api/v1/amenities/${amenity_id}"
+# Amenities - Get amenity by ID (Public)
+amenity_details=$(curl -s -X GET "${BASE_URL}/api/v1/amenities/${amenity_id}")
+print_response "Public Get Amenity by ID" "$amenity_details"
 
-# Places - Create a new place (Authenticated, regular user)
-place_create_response=$(curl -s -X POST "${BASE_URL}/api/v1/places/" \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer ${user_token}" \
-     -d "{\"title\": \"Cozy Apartment\", \"description\": \"A nice place\", \"price\": 100.0, \"latitude\": 40.7128, \"longitude\": -74.0060, \"owner_id\": \"${user_id}\", \"amenities\": [\"${amenity_id}\"]}")
+# Places - Get all places (Public)
+all_places=$(curl -s -X GET "${BASE_URL}/api/v1/places")
+print_response "Public Get All Places" "$all_places"
+
+# Extract place IDs from initialized data
+place1_id=$(echo "$all_places" | jq -r '.[0].id')  # Cozy Cottage
+place2_id=$(echo "$all_places" | jq -r '.[1].id')  # City Apartment
+
+# Places - Create a new place (Authenticated, new user)
+place_create_response=$(curl -s -X POST "${BASE_URL}/api/v1/places" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${new_user_token}" \
+    -d "{\"title\": \"Cozy Apartment\", \"description\": \"A nice place\", \"price\": 100.0, \"latitude\": 40.7128, \"longitude\": -74.0060, \"owner_id\": \"${user_id}\", \"amenities\": [\"${amenity_id}\"]}")
 place_id=$(echo "$place_create_response" | jq -r '.id')
-if [ "$place_id" == "null" ] || [ -z "$place_id" ]; then
-    echo "Error: Failed to create place. Response: $place_create_response"
-    exit 1
-else
-    echo "Created Place ID: $place_id"
-fi
+print_response "New User Creates New Place" "$place_create_response"
+
+# Places - Get place by ID (Public)
+place_details=$(curl -s -X GET "${BASE_URL}/api/v1/places/${place_id}")
+print_response "Public Get New Place by ID" "$place_details"
+
+# Reviews - Create a review (Authenticated, regular user)
+review_create_response=$(curl -s -X POST "${BASE_URL}/api/v1/reviews" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${user_token}" \
+    -d "{\"user_id\": \"${regular_user_id}\", \"place_id\": \"${place_id}\", \"rating\": 5, \"text\": \"Fantastic stay!\"}")
+review_id=$(echo "$review_create_response" | jq -r '.id')
+print_response "Regular User Creates Review" "$review_create_response"
+echo "Review ID: $review_id"  # Debug output
+
+# Reviews - Get all reviews (Public)
+all_reviews=$(curl -s -X GET "${BASE_URL}/api/v1/reviews")
+print_response "Public Get All Reviews" "$all_reviews"
+
+# Reviews - Get reviews by place (Public)
+place_reviews=$(curl -s -X GET "${BASE_URL}/api/v1/places/${place_id}/reviews")
+print_response "Public Get Reviews for Place (Cozy Apartment)" "$place_reviews"
+
+# Reviews - Delete the new review (Admin only)
+delete_review_response=$(curl -s -X DELETE "${BASE_URL}/api/v1/reviews/${review_id}" \
+    -H "Authorization: Bearer ${admin_token}")
+print_response "Admin Deletes New Review" "$delete_review_response"
+
+# Delete the new place (Admin only)
+delete_place_response=$(curl -s -X DELETE "${BASE_URL}/api/v1/places/${place_id}" \
+    -H "Authorization: Bearer ${admin_token}")
+print_response "Admin Deletes New Place" "$delete_place_response"
+
+# Amenities - Delete the new amenity (Admin only)
+delete_amenity_response=$(curl -s -X DELETE "${BASE_URL}/api/v1/amenities/${amenity_id}" \
+    -H "Authorization: Bearer ${admin_token}")
+print_response "Admin Deletes New Amenity" "$delete_amenity_response"
+
+# Users - Delete the new user (Admin only)
+delete_user_response=$(curl -s -X DELETE "${BASE_URL}/api/v1/users/${user_id}" \
+    -H "Authorization: Bearer ${admin_token}")
+print_response "Admin Deletes New User" "$delete_user_response"

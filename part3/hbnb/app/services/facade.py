@@ -13,8 +13,8 @@ class HBnBFacade:
         self.review_repo = SQLAlchemyRepository(Review)
         self.amenity_repo = SQLAlchemyRepository(Amenity)
 
-        # Pre-population logic is commented out until database initialization is set up
         """
+        # Pre-population logic is commented out until database initialization is set up
         # Pre-populate with an admin user
         admin_user = User(
             first_name="Admin",

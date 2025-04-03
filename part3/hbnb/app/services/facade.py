@@ -123,6 +123,8 @@ class HBnBFacade:
         price = place_data.get('price')
         latitude = place_data.get('latitude')
         longitude = place_data.get('longitude')
+        owner_id = place_data.get('owner_id')
+        amenity_ids = place_data.get('amenities', [])
 
         # Validate inputs
         if not title or len(title) > 100:
@@ -133,9 +135,17 @@ class HBnBFacade:
             raise ValueError("Latitude is required and must be between -90 and 90")
         if not longitude or not (-180 <= float(longitude) <= 180):
             raise ValueError("Longitude is required and must be between -180 and 180")
+        # Check owner and amenities
+        owner = self.get_user(owner_id)
+        if not owner:
+            raise ValueError("Owner not found")
+        for amenity_id in amenity_ids:
+            if not self.get_amenity(amenity_id):
+                raise ValueError(f"Amenity with ID {amenity_id} not found")
 
         # Create Place
-        place = Place(title, description, price, latitude, longitude)
+        place = Place(title, description, price, latitude, longitude, owner_id)
+        place.amenities = [self.get_amenity(aid) for aid in amenity_ids]  # Add amenities
         self.place_repo.add(place)
         return place
 
@@ -163,10 +173,21 @@ class HBnBFacade:
         if 'longitude' in place_data:
             if not (-180 <= float(place_data['longitude']) <= 180):
                 raise ValueError("Longitude must be between -180 and 180")
+        # Check owner + amenities
+        if 'owner_id' in place_data:
+            owner = self.get_user(place_data['owner_id'])
+            if not owner:
+                raise ValueError("Owner not found")
+            place_data['owner_id'] = owner.id
+        if 'amenities' in place_data:
+            for amenity_id in place_data['amenities']:
+                if not self.get_amenity(amenity_id):
+                    raise ValueError(f"Amenity with ID {amenity_id} not found")
+            place.amenities = [self.get_amenity(aid) for aid in place_data['amenities']]
 
         # Update only provided fields
         update_data = {}
-        for key in ['title', 'description', 'price', 'latitude', 'longitude']:
+        for key in ['title', 'description', 'price', 'latitude', 'longitude', 'owner_id']:
             if key in place_data:
                 update_data[key] = place_data[key]
         self.place_repo.update(place_id, update_data)
@@ -174,17 +195,26 @@ class HBnBFacade:
 
     """Review Facade"""
     def create_review(self, review_data):
+        user_id = review_data.get('user_id')
+        place_id = review_data.get('place_id')
         text = review_data.get('text')
         rating = review_data.get('rating')
 
+        # check user + place
+        user = self.get_user(user_id)
+        if not user:
+            raise ValueError("User not found")
+        place = self.get_place(place_id)
         # Validate inputs
+        if not place:
+            raise ValueError("Place not found")
         if not rating or not 1 <= int(rating) <= 5:
             raise ValueError("Rating is required and must be between 1 and 5")
         if not text or len(text.strip()) == 0:
             raise ValueError("Review text is required")
 
         # Create review
-        review = Review(text, rating)
+        review = Review(place_id, user_id, text, rating)
         self.review_repo.add(review)
         return review
 
@@ -193,6 +223,12 @@ class HBnBFacade:
 
     def get_all_reviews(self):
         return self.review_repo.get_all()
+    
+    def get_reviews_by_place(self, place_id):
+        place = self.get_place(place_id)
+        if not place:
+            raise ValueError("Place not found")
+        return place.reviews.all()  # Using SQLAlchemy relationship
 
     def update_review(self, review_id, review_data):
         review = self.get_review(review_id)

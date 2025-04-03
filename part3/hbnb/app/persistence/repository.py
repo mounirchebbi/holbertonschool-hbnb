@@ -1,6 +1,7 @@
 # app/persistence/repository.py
 from abc import ABC, abstractmethod
-from app import db
+from app.database import db  # Import db from the new module
+#from app import db
 
 
 

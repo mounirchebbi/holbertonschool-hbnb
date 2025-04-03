@@ -1,6 +1,7 @@
 # app/models/base_model.py
 
-from app import db
+#from app import db
+from app.database import db  # Import db from the new module
 import uuid
 from datetime import datetime
 

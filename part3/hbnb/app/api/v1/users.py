@@ -37,14 +37,16 @@ class UserList(Resource):
         current_user = get_jwt_identity()
         if not current_user.get('is_admin'):
             return {'error': 'Admin privileges required'}, 403
-  
+
         user_data = api.payload
+
         # Check email uniqueness
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
             return {'error': 'Email already registered'}, 400
         try:
             new_user = facade.create_user(user_data)
+
             # Return only ID and success message, excluding password
             return {
                 'id': new_user.id,

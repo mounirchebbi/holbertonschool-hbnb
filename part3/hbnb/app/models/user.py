@@ -1,6 +1,8 @@
 # app/models/user.py
 from .base_model import BaseModel
-from app import db
+from app.database import db  # Import db from the new module
+
+#from app import db
 from flask_bcrypt import Bcrypt  # Import directly from flask_bcrypt
 bcrypt = Bcrypt()  # Initialize bcrypt here
 

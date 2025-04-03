@@ -1,21 +1,23 @@
 # app/models/review.py
 from .base_model import BaseModel
+from app.database import db  # Import db from the new module
 
 class Review(BaseModel):
-    def __init__(self, place, user, rating, text):
+    __tablename__ = 'reviews'
+
+    text = db.Column(db.Text, nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+
+    def __init__(self, text, rating):
         super().__init__()
-        self.place = place  # Store place ID
-        self.user = user  # Store user ID
-        self.rating = int(rating)
         self.text = text
+        self.rating = int(rating)
 
     def to_dict(self):
         return {
             'id': self.id,
-            'place': self.place,
-            'user': self.user,
-            'rating': self.rating,
             'text': self.text,
+            'rating': self.rating,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }

@@ -66,6 +66,7 @@ hbnb/
     `Example: PlaceRepository.add() saves a new place to the places table.`
     
 #### Entities
+```
 - User (app/models/user.py)
 Attributes: id, first_name, last_name, email, password, is_admin, created_at, updated_at.
 Table: users.
@@ -85,14 +86,17 @@ Table: reviews.
 - Place_Amenity (app/models/place_amenity.py)
 Attributes: place_id, amenity_id.
 Table: place_amenity.
+```
+
 
 #### Relatioships
-
+```
 User ↔ Place: One-to-Many (User.places, Place.owner_id, backref='owner').
 User ↔ Review: One-to-Many (User.reviews, Review.user_id, backref='author').
 Place ↔ Review: One-to-Many (Place.reviews, Review.place_id, backref='place').
 Place ↔ Amenity: Many-to-Many (via place_amenity table, Place.amenities, Amenity.places).
 All use lazy='dynamic' for flexible querying, with BaseModel providing common fields.
+```
 
 ### How They Work Together
 

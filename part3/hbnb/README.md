@@ -42,30 +42,30 @@ hbnb/
 ├── requirements.txt                 # Lists Python dependencies required for the project
 ├── README.md                        # Provides documentation and information about the project
 ```
+## APP Layers
 
-
-1. API Layer
+### 1. API Layer
 
     - Role: Handles client requests and responses for the HBnB app via REST endpoints.
     - Where: app/api/v1/ (e.g., users.py, places.py, reviews.py, auth.py).
     - What It Does: Defines routes like /api/v1/places, validates inputs (e.g., place title), checks JWT authentication, and formats JSON responses (e.g., place.to_dict()).
     - Example: POST /api/v1/users in users.py creates a user by calling the facade.
 
-2. Business Logic Layer
+### 2. Business Logic Layer
 
     - Role: Manages HBnB’s core rules and processes.
     - Where: app/services/facade.py (HBnBFacade).
     - What It Does: Enforces rules (e.g., users can’t review their own place), validates data (e.g., rating 1-5), and coordinates with repositories.
     `Example: create_place() in facade.py ensures valid coordinates and owner, then saves the place.`
 
-3. Persistence Layer
+### 3. Persistence Layer
 
     - Role: Stores and retrieves HBnB data in the database.
     - Where: app/persistence/ (e.g., user_repository.py, place_repository.py) and app/models/.
     - What It Does: Maps models (e.g., User, Place) to tables via SQLAlchemy and handles CRUD operations (e.g., add, get).
     `Example: PlaceRepository.add() saves a new place to the places table.`
 
-How They Work Together
+### How They Work Together
 
     - Flow:
         API gets a request (e.g., POST /api/v1/places), validates it, and calls the facade.
@@ -75,7 +75,7 @@ How They Work Together
     `Example: Creating a place starts at places.py, goes to facade.create_place(), then place_repo.add(), and returns the new place’s details.`
 
 
-Installation
+### Installation
 
 - To set up and run the HBnB application locally:
 

@@ -5,230 +5,104 @@ HBnB is a web app designed for managing property rentals, allowing users to regi
 ## Project Setup Overview
 
 ### Directory Structure and Purpose
-
-    hbnb/
-    ├── app/
-    │   ├── __init__.py
-    │   ├── api/
-    │   │   ├── __init__.py
-    │   │   ├── v1/
-    │   │       ├── __init__.py
-    │   │       ├── users.py
-    │   │       ├── places.py
-    │   │       ├── reviews.py
-    │   │       ├── amenities.py
-    │   ├── models/
-    │   │   ├── __init__.py
-    │   │   ├── user.py
-    │   │   ├── place.py
-    │   │   ├── review.py
-    │   │   ├── amenity.py
-    │   ├── services/
-    │   │   ├── __init__.py
-    │   │   ├── facade.py
-    │   ├── persistence/
-    │       ├── __init__.py
-    │       ├── repository.py
-    ├── run.py
-    ├── config.py
-    ├── requirements.txt
-    ├── README.md
-
-
-
-### File Descriptions
-
-- `run.py`: Entry point to start the Flask application
-- `config.py`: Contains configuration classes for different environments
-- `requirements.txt`: Lists all Python package dependencies
-- `app/__init__.py`: Creates and configures the Flask application and API
-- `app/api/v1/*.py`: Define RESTful API endpoints for different resources
-- `app/models/*.py`: Contain class definitions for core entities
-- `app/services/facade.py`: Implements business logic and coordinates between models and persistence
-- `app/persistence/repository.py`: Provides data storage abstraction (currently in-memory)
-
-### Business Logic Layer
-The business logic layer is implemented in the app/models/ directory and consists of 4 core entities: User, Place, Review, and Amenity. These classes inherit from a BaseModel to provide common functionality like unique IDs and timestamps.
-
-## Entities and Responsibilities
-
-### BaseModel
-`description`: A base class providing common attributes and methods for all entities.
-
-`Attributes`:
 ```
-- id (String): Unique identifier (UUID).
-- created_at (DateTime): Creation timestamp.
-- updated_at (DateTime): Last update timestamp.
-```
-
-`Methods`:
-```
-- save(): Updates the updated_at timestamp.
-- update(data): Updates attributes from a dictionary and calls save().
-```
-
-`Responsibility`: Ensures all entities have consistent foundational behavior.
-
-### User
-`description`: Represents a user who can own places and write reviews.
-
-`Attributes`:
-```
-- first_name (String): Required, max 50 characters.
-- last_name (String): Required, max 50 characters.
-- email (String): Required, must be a valid email format.
-- password_hash (String): Hashed password for security.
-- is_admin (Boolean): Defaults to False.
-```
-`Methods`:
-```
-- register(): Class method to create a new user + validation.
-- verify_password(password): Checks if a password matches the hash.
-- to_dict(): Serializes the user to a dictionary.
-```
-
-`Responsibility`: Manages user data, authentication, and serves as the owner of places or author of reviews.
-
-### Place
-`description`: Represents a location (e.g., a rental property) owned by a user.
-
-`Attributes`:
-```
-- title (String): Required, max 100 characters.
-- description (String): Optional description.
-- price (Float): Must be positive.
-- latitude (Float): Between -90 and 90.
-- longitude (Float): Between -180 and 180.
-- owner (String): ID of the owning User.
-- amenities (List): List of Amenity IDs (many-to-many).
-- reviews (List): List of Review IDs (one-to-many).
-```
-
-`Methods`:
-```
-- create(): Class method to instantiate a place + validation.
-- add_amenity(amenity): Adds an amenity to the place.
-- remove_amenity(amenity_id): Removes an amenity.
-- add_review(review): Adds a review to the place.
-- get_amenities(): Returns the list of amenity IDs.
-- get_reviews(): Returns the list of review IDs.
-- to_dict(): Serializes the place to a dictionary.
-```
-
-`Responsibility`: Manages place details, its amenities, and associated reviews, ensuring data integrity through validation.
-
-### Review
-`description`: Represents a user’s review of a place.
-
-`Attributes`:
-```
-- place (String): ID of the reviewed Place.
-- user (String): ID of the authoring User.
-- rating (Integer): Between 1 and 5.
-- text (String): Required review content.
-```
-
-`Methods`:
-```
-- create(): Class method to create a review and link it to the place + validation.
-- to_dict(): Serializes the review to a dictionary.
-```
-
-- Responsibility: Captures feedback on a place, linking it to both a user and a place, with validation for rating and text.
-
-### Amenity
-`description`: Represents a feature available at a place (e.g., Wi-Fi, parking).
-
-`Attributes`:
-```
-- name (String): Required, max 50 characters.
-- description (String): Optional description.
-```
-`Methods`:
-```
-- create(): Class method to instantiate an amenity + validation.
-- to_dict(): Serializes the amenity to a dictionary.
-```
-
-`Responsibility`: Defines reusable features that can be associated with multiple places.
-
-## Relationships
-`User-Place`: One-to-many (a user can own multiple places).
-`Place-Review`: One-to-many (a place can have multiple reviews).
-`Place-Amenity`: Many-to-many (a place can have multiple amenities, and an amenity can belong to multiple places).
-
-## Class usage examples:
-
-### User
-`create:`
-```
-new_user = User.register(
-    first_name="Alice",
-    last_name="Smith",
-    email="alice.smith@example.com",
-    password="securepass123"
-)
-```
-
-`update:`
-```
-new_user.update({
-    "first_name": "Alicia",
-    "last_name": "Smithson",
-    "email": "alicia.smithson@example.com"
-})
-```
-
-### Place
-`create:`
-```
-new_place = Place.create(
-    title="Cozy Cottage",
-    description="A lovely retreat in the woods",
-    price=120.50,
-    latitude=45.678,
-    longitude=-78.901,
-    owner=new_user  # Pass the User instance created above
-)
-```
-
-`update:`
-```
-new_place.update({
-    "title": "Luxury Cozy Cottage",
-    "description": "A luxurious retreat with modern amenities",
-    "price": 150.75,
-    "latitude": 45.679,
-    "longitude": -78.902
-})
-```
-
-### Review
-`create:`
-```
-
-new_review = Review.create(
-    place=new_place,  # Pass the Place instance
-    user=new_user,    # Pass the User instance
-    rating=4,
-    text="Really enjoyed the stay, great location!"
-)
-```
-
-### Amenity
-`create:`
-```
-new_amenity = Amenity.create(
-    name="Wi-Fi",
-    description="High-speed internet access"
-)
-"Add the amenity to the place"
-new_place.add_amenity(new_amenity)
+hbnb/
+├── app/
+│   ├── __init__.py                  # Application factory and initialization of Flask app and extensions
+│   ├── api/
+│   │   ├── __init__.py              # API module initialization (empty)
+│   │   ├── v1/
+│   │   │   ├── __init__.py          # API v1 namespace initialization (empty)
+│   │   │   ├── auth.py             # Defines authentication endpoints (e.g., login with JWT)
+│   │   │   ├── users.py            # Defines REST API endpoints for user operations
+│   │   │   ├── places.py           # Defines REST API endpoints for place operations
+│   │   │   ├── reviews.py          # Defines REST API endpoints for review operations
+│   │   │   ├── amenities.py        # Defines REST API endpoints for amenity operations
+│   ├── models/
+│   │   ├── __init__.py              # Models module initialization (empty)
+│   │   ├── base_model.py           # Defines the abstract base class for all models with common attributes
+│   │   ├── user.py                 # Defines the User model with attributes and methods (e.g., password hashing)
+│   │   ├── place.py                # Defines the Place model with attributes and relationships
+│   │   ├── review.py               # Defines the Review model with attributes and relationships
+│   │   ├── amenity.py              # Defines the Amenity model with attributes
+│   │   ├── place_amenity.py        # Defines the association table for the many-to-many Place-Amenity relationship
+│   ├── services/
+│   │   ├── __init__.py              # Services module initialization and facade instance creation
+│   │   ├── facade.py               # Provides a facade layer for business logic and interaction with repositories
+│   ├── persistence/
+│   │   ├── __init__.py              # Persistence module initialization (empty)
+│   │   ├── repository.py           # Defines abstract Repository class and SQLAlchemy/InMemory implementations
+│   │   ├── user_repository.py      # Implements User-specific repository methods using SQLAlchemy
+│   │   ├── place_repository.py     # Implements Place-specific repository methods using SQLAlchemy
+│   │   ├── review_repository.py    # Implements Review-specific repository methods using SQLAlchemy
+│   │   ├── amenity_repository.py   # Implements Amenity-specific repository methods using SQLAlchemy
+│   ├── database.py                  # Initializes the SQLAlchemy database instance (db)
+├── run.py                           # Entry point for running the Flask app and initializing the database
+├── config.py                        # Contains configuration classes for the Flask application
+├── requirements.txt                 # Lists Python dependencies required for the project
+├── README.md                        # Provides documentation and information about the project
 ```
 
 
-## Installation and Running
+1. API Layer
 
-- pip install -r requirements.txt
-- python3 run.py
+    - Role: Handles client requests and responses for the HBnB app via REST endpoints.
+    - Where: app/api/v1/ (e.g., users.py, places.py, reviews.py, auth.py).
+    - What It Does: Defines routes like /api/v1/places, validates inputs (e.g., place title), checks JWT authentication, and formats JSON responses (e.g., place.to_dict()).
+    - Example: POST /api/v1/users in users.py creates a user by calling the facade.
+
+2. Business Logic Layer
+
+    - Role: Manages HBnB’s core rules and processes.
+    - Where: app/services/facade.py (HBnBFacade).
+    - What It Does: Enforces rules (e.g., users can’t review their own place), validates data (e.g., rating 1-5), and coordinates with repositories.
+    `Example: create_place() in facade.py ensures valid coordinates and owner, then saves the place.`
+
+3. Persistence Layer
+
+    - Role: Stores and retrieves HBnB data in the database.
+    - Where: app/persistence/ (e.g., user_repository.py, place_repository.py) and app/models/.
+    - What It Does: Maps models (e.g., User, Place) to tables via SQLAlchemy and handles CRUD operations (e.g., add, get).
+    `Example: PlaceRepository.add() saves a new place to the places table.`
+
+How They Work Together
+
+    - Flow:
+        API gets a request (e.g., POST /api/v1/places), validates it, and calls the facade.
+        Facade checks rules (e.g., valid price) and tells the repository to save the place.
+        Repository uses SQLAlchemy to store it in the database.
+        Data flows back: repository → facade → API, which sends a JSON response.
+    `Example: Creating a place starts at places.py, goes to facade.create_place(), then place_repo.add(), and returns the new place’s details.`
+
+
+Installation
+
+- To set up and run the HBnB application locally:
+
+    Clone the Repository (assumed step):
+        If the project is in a Git repository, use:
+```
+    git clone <repository-url>
+    cd hbnb
+```
+
+
+Install Dependencies:
+
+    - The requirements.txt file lists dependencies (e.g., Flask, Flask-RESTX, SQLAlchemy). Install them with:
+```
+    pip install -r requirements.txt
+```
+Run the Application:
+
+    - The entry point is run.py, which initializes the database and starts the Flask server:
+```
+    python run.py
+```
+Running Tests from test_api_endpoints.sh
+
+Make the script executable and run it:
+```
+    chmod +x test_api_endpoints.sh
+    ./test_api_endpoints.sh
+```

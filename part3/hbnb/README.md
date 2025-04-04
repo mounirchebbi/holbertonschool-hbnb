@@ -110,9 +110,9 @@ All use lazy='dynamic' for flexible querying, with BaseModel providing common fi
 
 ### Installation
 
-- To set up and run the HBnB application locally:
+To set up and run the HBnB application locally:
 
-    Clone the Repository (assumed step):
+    - Clone the Repository (assumed step):
         If the project is in a Git repository, use:
 ```
     git clone <repository-url>
@@ -120,21 +120,21 @@ All use lazy='dynamic' for flexible querying, with BaseModel providing common fi
 ```
 
 
-Install Dependencies:
+    - Install Dependencies:
 
-    - The requirements.txt file lists dependencies (e.g., Flask, Flask-RESTX, SQLAlchemy). Install them with:
+      The requirements.txt file lists dependencies (e.g., Flask, Flask-RESTX, SQLAlchemy). Install them with:
 ```
     pip install -r requirements.txt
 ```
-Run the Application:
+### Run the Application:
 
     - The entry point is run.py, which initializes the database and starts the Flask server:
 ```
     python run.py
 ```
-Running Tests from test_api_endpoints.sh
+    - Running Tests from test_api_endpoints.sh
 
-Make the script executable and run it:
+      Make the script executable and run it:
 ```
     chmod +x test_api_endpoints.sh
     ./test_api_endpoints.sh

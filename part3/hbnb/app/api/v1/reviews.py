@@ -5,10 +5,10 @@ from app.services import facade
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import current_app
 
-# Define the API namespace for review-related operations
+# API namespace for review operations
 api = Namespace('reviews', description='Review operations')
 
-# Define the review model for input validation and API documentation
+# review model for input validation and API documentation
 review_model = api.model('Review', {
     'text': fields.String(required=True, description='Text of the review'),
     'rating': fields.Integer(required=True, description='Rating of the place (1-5)'),
@@ -16,13 +16,13 @@ review_model = api.model('Review', {
     'place_id': fields.String(required=True, description='ID of the place')
 })
 
-# Define a separate model for updates, where all fields are optional
+# review model for updates all fields are optional
 review_update_model = api.model('ReviewUpdate', {
     'text': fields.String(description='Text of the review'),
     'rating': fields.Integer(description='Rating of the place (1-5)')
 })
 
-# Resource for handling operations on the collection of reviews
+# reviews operations
 @api.route('/reviews')  # Base route for review collection
 class ReviewList(Resource):
     # POST method to create a new review, requires JWT authentication
@@ -54,22 +54,22 @@ class ReviewList(Resource):
         # Override user_id with the authenticated user's ID for security
         review_data['user_id'] = current_user['id']
         
-        # Attempt to create the review via the facade
+        # create the review via the facade
         try:
             new_review = facade.create_review(review_data)
             return new_review.to_dict(), 201
         except ValueError as e:
-            return {'error': str(e)}, 400  # Return validation errors if any
+            return {'error': str(e)}, 400  # Return validation errors
     
     # GET method to retrieve all reviews, no authentication required
     @api.response(200, 'List of reviews retrieved successfully')
     def get(self):
         """Retrieve a list of all reviews"""
-        # Fetch all reviews from the facade
+        # Fetch all reviews from facade
         reviews = facade.get_all_reviews()
         return [review.to_dict() for review in reviews], 200
 
-# Resource for handling operations on a specific review by ID
+# operations on review by ID
 @api.route('/reviews/<review_id>')
 class ReviewResource(Resource):
     # GET method to retrieve review details, no authentication required
@@ -114,7 +114,7 @@ class ReviewResource(Resource):
         except ValueError as e:
             return {'error': str(e)}, 400  # Return validation errors if any
     
-    # DELETE method to remove a review, requires JWT authentication
+    # DELETE a review, requires JWT authentication
     @jwt_required()
     @api.response(200, 'Review deleted successfully')
     @api.response(403, 'Unauthorized action')
@@ -130,15 +130,15 @@ class ReviewResource(Resource):
         if not review:
             return {'error': 'Review not found'}, 404
         
-        # Restrict non-admin users to deleting only their own reviews
+        #  non-admin users delete only their own reviews
         if not is_admin and review.user_id != current_user['id']:
             return {'error': 'Unauthorized action'}, 403
         
-        # Delete the review via the facade
+        # Delete review via facade
         facade.delete_review(review_id)
         return {'message': 'Review deleted successfully'}, 200
 
-# Resource for handling reviews associated with a specific place
+# reviews by place id
 @api.route('/places/<place_id>/reviews')
 class PlaceReviewList(Resource):
     # GET method to retrieve all reviews for a place, no authentication required

@@ -94,6 +94,11 @@ class HBnBFacade:
             raise ValueError("User not found")
         self.user_repo.delete(user_id)
     
+    # get all users
+    def get_all_users(self):
+        """Retrieve all users from the repository"""
+        return self.user_repo.get_all()
+    
     """ Amenity Facade Methods """
     
     # Creates a new amenity with validation

@@ -4,7 +4,7 @@ from .base_model import BaseModel
 from app.database import db
 from .place_amenity import place_amenity
 
-# Place model representing a rental property
+# Place model
 class Place(BaseModel):
     __tablename__ = 'places'
     

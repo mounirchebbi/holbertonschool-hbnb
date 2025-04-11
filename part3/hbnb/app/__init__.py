@@ -11,11 +11,11 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from app.database import db  # Import db from the new module
 
-# Initialize Flask extensions
+# Instantiate Flask extensions
 bcrypt = Bcrypt()
 jwt = JWTManager()
 
-# Function to create and configure the Flask app
+# Create and configure the Flask app
 def create_app(config_class="config.DevelopmentConfig"):
     app = Flask(__name__)
     app.config.from_object(config_class)

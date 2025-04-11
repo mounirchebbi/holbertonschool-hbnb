@@ -5,10 +5,10 @@ from app.services import facade
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import current_app
 
-# Define the API namespace for place-related operations
+# API namespace for place operations
 api = Namespace('places', description='Place operations')
 
-# Define models for related entities to enrich place data in responses
+# amenity model to enrich place data in responses
 amenity_model = api.model('PlaceAmenity', {
     'id': fields.String(description='Amenity ID'),
     'name': fields.String(description='Name of the amenity')
@@ -21,7 +21,7 @@ user_model = api.model('PlaceUser', {
     'email': fields.String(description='Email of the owner')
 })
 
-# Define the place model for input validation and API documentation
+# place model for input validation and API documentation
 place_model = api.model('Place', {
     'title': fields.String(required=True, description='Title of the place'),
     'description': fields.String(description='Description of the place'),
@@ -32,10 +32,10 @@ place_model = api.model('Place', {
     'amenities': fields.List(fields.String, required=True, description="List of amenities ID's")
 })
 
-# Resource for handling operations on the collection of places
+# places operations
 @api.route('')
 class PlaceList(Resource):
-    # POST method to create a new place, requires JWT authentication
+    # POST create a new place, requires JWT authentication
     @jwt_required()  # Ensures the request includes a valid JWT token
     @api.expect(place_model)  # Validates input against place_model
     @api.response(201, 'Place successfully created')
@@ -48,7 +48,7 @@ class PlaceList(Resource):
         is_admin = current_user.get('is_admin', False)
         place_data = api.payload
         
-        # Restrict non-admin users to creating places only for themselves
+        # non-admin can create places only for themselves
         if not is_admin and place_data['owner_id'] != current_user['id']:
             return {'error': 'Unauthorized action'}, 403
         
@@ -56,7 +56,7 @@ class PlaceList(Resource):
         if is_admin and not facade.get_user(place_data['owner_id']):
             return {'error': 'Owner not found'}, 400
         
-        # Attempt to create the place via the facade
+        # create the place via facade
         try:
             new_place = facade.create_place(place_data)
             return self._enrich_place_data(new_place), 201  # Return enriched data
@@ -88,7 +88,7 @@ class PlaceList(Resource):
         place_dict['amenities'] = [amenity.to_dict() for amenity in amenities if amenity]
         return place_dict
 
-# Resource for handling operations on a specific place by ID
+# place by ID operations
 @api.route('/<place_id>')
 class PlaceResource(Resource):
     # GET method to retrieve place details, no authentication required

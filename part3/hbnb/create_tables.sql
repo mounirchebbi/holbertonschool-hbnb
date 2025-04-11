@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS places;
 DROP TABLE IF EXISTS amenities;
 DROP TABLE IF EXISTS users;
 
+-- Create User Table
 CREATE TABLE users (
     id CHAR(36) PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
@@ -13,6 +14,7 @@ CREATE TABLE users (
     is_admin BOOLEAN DEFAULT FALSE
 );
 
+-- Create Place Table
 CREATE TABLE places (
     id CHAR(36) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -24,10 +26,11 @@ CREATE TABLE places (
     FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Create Review Table
 CREATE TABLE reviews (
     id CHAR(36) PRIMARY KEY,
     text TEXT NOT NULL,
-    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
     user_id CHAR(36) NOT NULL,
     place_id CHAR(36) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -35,11 +38,13 @@ CREATE TABLE reviews (
     CONSTRAINT unique_user_place UNIQUE (user_id, place_id)
 );
 
+-- Create Amenity Table
 CREATE TABLE amenities (
     id CHAR(36) PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE
 );
 
+-- Create Place_Amenity Table (Many-to-Many)
 CREATE TABLE place_amenity (
     place_id CHAR(36) NOT NULL,
     amenity_id CHAR(36) NOT NULL,

@@ -1,5 +1,4 @@
 #!/bin/bash
-# File: test_api_endpoints.sh
 
 # Base URL
 BASE_URL="http://localhost:5000"
@@ -16,13 +15,13 @@ user_response=$(curl -s -X POST "${BASE_URL}/api/v1/login" \
     -H "Content-Type: application/json" \
     -d '{"email": "user@example.com", "password": "password123"}')
 user_token=$(echo "$user_response" | jq -r '.access_token')
-regular_user_id=$(echo "$user_response" | jq -r '.id')  # Assuming the login response includes user ID; adjust if needed
+regular_user_id=$(echo "$user_response" | jq -r '.id')
 print_response "Regular User Token" "$user_response"
 
 # Authentication (Login) - Get admin token
 admin_response=$(curl -s -X POST "${BASE_URL}/api/v1/login" \
     -H "Content-Type: application/json" \
-    -d '{"email": "admin@example.com", "password": "adminpass123"}')
+    -d '{"email": "admin@hbnb.io", "password": "admin1234"}')
 admin_token=$(echo "$admin_response" | jq -r '.access_token')
 print_response "Admin Token" "$admin_response"
 

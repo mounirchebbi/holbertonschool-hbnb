@@ -4,10 +4,10 @@ from flask_restx import Namespace, Resource, fields
 from app.services import facade
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-# Define the API namespace for user-related operations
+# API namespace for user operations
 api = Namespace('users', description='User operations')
 
-# Define the user model for input validation and API documentation
+# user model for input validation and API documentation
 user_model = api.model('User', {
     'first_name': fields.String(required=True, description='First name of the user'),
     'last_name': fields.String(required=True, description='Last name of the user'),
@@ -16,7 +16,7 @@ user_model = api.model('User', {
     'is_admin': fields.Boolean(default=False, description='Admin status of the user')
 })
 
-# Define a separate model for updates, where all fields are optional
+# model for updates, all fields are optional
 user_update_model = api.model('UserUpdate', {
     'first_name': fields.String(description='First name of the user'),
     'last_name': fields.String(description='Last name of the user'),
@@ -25,12 +25,12 @@ user_update_model = api.model('UserUpdate', {
     'is_admin': fields.Boolean(description='Admin status of the user')
 })
 
-# Resource for handling operations on the collection of users
+# Users operations
 @api.route('')
 class UserList(Resource):
     # POST method to create a new user, requires JWT authentication
-    @jwt_required()  # Ensures the request includes a valid JWT token
-    @api.expect(user_model, validate=True)  # Validates input against user_model
+    @jwt_required()  # request must include a valid JWT token
+    @api.expect(user_model, validate=True)  # validate input against user_model
     @api.response(201, 'User successfully created')
     @api.response(400, 'Email already registered')
     @api.response(400, 'Invalid input data')
@@ -53,22 +53,42 @@ class UserList(Resource):
         try:
             new_user = facade.create_user(user_data)
             
-            # Return only the ID and a success message (excluding sensitive data like password)
+            # Return only the ID and a success message (no password)
             return {
                 'id': new_user.id,
                 'message': 'User successfully created'
             }, 201
         except ValueError as e:
-            return {'error': str(e)}, 400  # Return validation errors if any
+            return {'error': str(e)}, 400  # Return validation errors
+        
+    # GET method to retrieve all users, requires JWT authentication and admin privileges
+    @jwt_required()
+    @api.response(200, 'List of users retrieved successfully')
+    @api.response(403, 'Admin privileges required')
+    @api.response(404, 'No users found')
+    def get(self):
+        """Retrieve a list of all users"""
+        # Check if the current user has admin privileges
+        current_user = get_jwt_identity()
+        if not current_user.get('is_admin'):
+            return {'error': 'Admin privileges required'}, 403
+        
+        # Fetch all users from the facade
+        users = facade.get_all_users()
+        if not users:
+            return {'error': 'No users found'}, 404
+        
+        # Return the list of users as dictionaries
+        return [user.to_dict() for user in users], 200
 
-# Resource for handling operations on a specific user by ID
+# operations on user by ID
 @api.route('/<string:user_id>')
 class UserResource(Resource):
     # GET method to retrieve user details, no authentication required
     @api.response(200, 'User details retrieved')
     @api.response(404, 'User not found')
     def get(self, user_id):
-        # Fetch the user from the facade
+        # Fetch user from facade
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
@@ -89,7 +109,7 @@ class UserResource(Resource):
         is_admin = current_user.get('is_admin', False)
         user_data = api.payload
         
-        # Restrict non-admin users to modifying only their own data
+        # non-admin users can modify only their own data
         if not is_admin:
             if user_id != current_user['id']:
                 return {'error': 'Unauthorized action'}, 403
@@ -108,25 +128,25 @@ class UserResource(Resource):
         if not user:
             return {'error': 'User not found'}, 404
         
-        # Attempt to update the user via the facade
+        # update user via facade
         try:
             updated_user = facade.update_user(user_id, user_data)
             return updated_user.to_dict(), 200
         except ValueError as e:
             return {'error': str(e)}, 400  # Return validation errors if any
 
-    # DELETE method to remove a user, requires JWT authentication and admin privileges
+    # DELETE a user, requires JWT authentication and admin privileges
     @jwt_required()
     @api.response(200, 'User deleted successfully')
     @api.response(403, 'Admin privileges required')
     @api.response(404, 'User not found')
     def delete(self, user_id):
         """Delete a user (admin only)"""
-        # Get the current user's identity from the JWT token
+        # Get current user's identity from the JWT token
         current_user = get_jwt_identity()
         is_admin = current_user.get('is_admin', False)
         
-        # Restrict deletion to admin users only
+        # only admin can delete
         if not is_admin:
             return {'error': 'Admin privileges required'}, 403
         
@@ -135,6 +155,6 @@ class UserResource(Resource):
         if not user:
             return {'error': 'User not found'}, 404
         
-        # Delete the user via the facade
+        # Delete user via facade
         facade.delete_user(user_id)
         return {'message': 'User deleted successfully'}, 200

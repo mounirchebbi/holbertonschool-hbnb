@@ -69,10 +69,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle login form submission
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            isLoggedIn = true;
-            window.location.href = 'index.html';
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            // Get email and password from form inputs
+            const email = loginForm.querySelector('#email').value;
+            const password = loginForm.querySelector('#password').value;
+
+            try {
+                // Make AJAX request to login endpoint
+                const response = await fetch('http://127.0.0.1:5000/api/v1/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                // Handle API response
+                if (response.ok) {
+                    const data = await response.json();
+                    // Store JWT token in a cookie
+                    document.cookie = `token=${data.access_token}; path=/; Secure; SameSite=Strict`;
+                    isLoggedIn = true; // Update login state
+                    window.location.href = 'index.html'; // Redirect to main page
+                } else {
+                    // Handle error response
+                    const errorData = await response.json();
+                    alert(`Login failed: ${errorData.error || 'Invalid credentials'}`);
+                }
+            } catch (error) {
+                // Handle network or other errors
+                alert('An error occurred during login. Please try again.');
+                console.error('Login error:', error);
+            }
         });
     }
 

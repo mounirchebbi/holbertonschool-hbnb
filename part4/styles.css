@@ -1,0 +1,194 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #F1FAEE;
+    color: #1D3557;
+}
+
+header {
+    background-color: #1D3557;
+    color: #F1FAEE;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    height: 50px;
+}
+
+nav a {
+    color: #F1FAEE;
+    text-decoration: none;
+    margin-left: 1rem;
+    font-weight: bold;
+}
+
+nav a.login-button {
+    background-color: #E63946;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+}
+
+main {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+footer {
+    background-color: #1D3557;
+    color: #F1FAEE;
+    text-align: center;
+    padding: 1rem;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+.places-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.place-card {
+    background-color: #A8DADC;
+    margin: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.place-card h3 {
+    color: #1D3557;
+    margin-bottom: 0.5rem;
+}
+
+.place-card p {
+    color: #457B9D;
+    margin-bottom: 1rem;
+}
+
+.details-button, .submit-button {
+    background-color: #457B9D;
+    color: #F1FAEE;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.details-button:hover, .submit-button:hover {
+    background-color: #1D3557;
+}
+
+.place-details {
+    background-color: #A8DADC;
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+.place-info h2 {
+    color: #1D3557;
+    margin-bottom: 1rem;
+}
+
+.place-info p {
+    color: #457B9D;
+    margin-bottom: 0.5rem;
+}
+
+.reviews-container {
+    margin-top: 2rem;
+}
+
+.review-card {
+    background-color: #A8DADC;
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+.review-card p {
+    color: #457B9D;
+}
+
+.review-card .rating {
+    color: #E63946;
+    font-weight: bold;
+}
+
+.add-review, .form {
+    background-color: #A8DADC;
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    color: #1D3557;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input, .form-group textarea, .form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #F1FAEE;
+    color: #1D3557;
+}
+
+.form-group textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+#filter {
+    margin-bottom: 2rem;
+}
+
+#filter label {
+    color: #1D3557;
+    margin-right: 1rem;
+}
+
+#filter select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #F1FAEE;
+    color: #1D3557;
+}
+
+        /* CSS to visually hide the headings without affecting layout */
+.visually-hidden {
+    position: absolute; /* Remove from normal flow */
+    width: 1px;        /* Minimize width */
+    height: 1px;       /* Minimize height */
+    margin: -1px;      /* Remove margin */
+    padding: 0;        /* Remove padding */
+    overflow: hidden;   /* Hide overflow */
+    clip: rect(0, 0, 0, 0); /* Clip the element */
+    border: 0;         /* Remove border */
+    white-space: nowrap; /* Prevent line breaks */
+}

@@ -1,6 +1,27 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Mock authentication state
     let isLoggedIn = false;
+    // Handle logout
+    const logoutLink = document.getElementById('logout-link');
+    if (logoutLink) {
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = 'index.html';
+        });
+    }
+
+    // Toggle login/logout visibility
+    const loginLink = document.getElementById('login-link');
+    if (getToken()) {
+        if (loginLink) loginLink.style.display = 'none';
+        if (logoutLink) logoutLink.style.display = 'inline-block';
+    }
+    else
+    {
+        if (loginLink) loginLink.style.display = 'inline-block';
+        if (logoutLink) logoutLink.style.display = 'none';
+    }
 
     // Function to get JWT token from cookie
     function getToken() {
@@ -269,16 +290,4 @@ document.addEventListener('DOMContentLoaded', () => {
             renderPlaces(places, maxPrice); // Render with filter
         });
     }
-
-    // Hide login button if user is authenticated
-    const loginButton = document.querySelector('.login-button');
-    if (loginButton) {
-        if (getToken()) {
-            loginButton.style.display = 'none';
-        }
-        else
-        {
-            loginButton.style.display = 'inline-block';
-        }
-}
 });

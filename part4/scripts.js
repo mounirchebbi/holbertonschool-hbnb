@@ -269,4 +269,16 @@ document.addEventListener('DOMContentLoaded', () => {
             renderPlaces(places, maxPrice); // Render with filter
         });
     }
+
+    // Hide login button if user is authenticated
+    const loginButton = document.querySelector('.login-button');
+    if (loginButton) {
+        if (getToken()) {
+            loginButton.style.display = 'none';
+        }
+        else
+        {
+            loginButton.style.display = 'inline-block';
+        }
+}
 });

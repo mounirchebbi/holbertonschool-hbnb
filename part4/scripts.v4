@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, {});
         return cookies.token || null;
     }
-
     function getUserIdFromToken(token) {
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
@@ -26,8 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return null;
         }
     }
-        
-
     // Token must be declared after function definitions
     const token = getToken();
     const isLoggedIn = !!token;
@@ -46,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'index.html';
         });
     }
-
     // === Login handling ===
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
@@ -75,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
     // === API Fetch helpers ===
     async function fetchPlaces() {
         try {
@@ -88,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return [];
         }
     }
-
     async function fetchPlaceDetails(id) {
         try {
             const res = await fetch(`http://127.0.0.1:5000/api/v1/places/${id}`);
@@ -99,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return null;
         }
     }
-
     async function fetchPlaceReviews(id) {
         try {
             const res = await fetch(`http://127.0.0.1:5000/api/v1/places/${id}/reviews`);
@@ -110,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return [];
         }
     }
-
     // === Render helpers ===
     function renderPlaces(places, maxPrice = Infinity) {
         const container = document.getElementById('places-list');
@@ -129,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 container.appendChild(card);
             });
     }
-
     function renderPlaceDetails(place) {
         const info = document.querySelector('#place-details .place-info');
         if (!info) return;
@@ -145,43 +136,25 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
     }
-
-    async function fetchUserName(userId) {
-        try {
-            const res = await fetch(`http://127.0.0.1:5000/api/v1/users/${userId}`);
-            if (!res.ok) throw new Error('Failed to fetch user name');
-            const data = await res.json();
-            return `${data.first_name} ${data.last_name}`;
-        } catch (err) {
-            console.error(`Error fetching name for user ${userId}:`, err);
-            return 'Unknown';
-        }
-    }
-
-    async function renderReviews(reviews) {
-        const reviewsContainer = document.getElementById('reviews');
-        if (!reviewsContainer) return;
-
-        reviewsContainer.innerHTML = '';
+    function renderReviews(reviews) {
+        const container = document.getElementById('reviews');
+        if (!container) return;
+        container.innerHTML = '';
         if (reviews.length === 0) {
-            reviewsContainer.innerHTML = '<p>No reviews yet.</p>';
-            return;
-        }
-
-        for (const review of reviews) {
-            const userName = await fetchUserName(review.user_id);
-
-            const reviewCard = document.createElement('div');
-            reviewCard.className = 'review-card';
-            reviewCard.innerHTML = `
-                <p>Posted by: ${userName}</p>
-                <p>review: "" ${review.text} ""</p>
-                <p class="rating">rating: ${review.rating} Stars</p>
-            `;
-            reviewsContainer.appendChild(reviewCard);
+            container.innerHTML = '<p>No reviews yet.</p>';
+        } else {
+            reviews.forEach(r => {
+                const card = document.createElement('div');
+                card.className = 'review-card';
+                card.innerHTML = `
+                    <p>${r.text}</p>
+                    <p>User: ${r.user_id}</p>
+                    <p class="rating">Rating: ${r.rating} Stars</p>
+                `;
+                container.appendChild(card);
+            });
         }
     }
-
     // === Index page ===
     const placesList = document.getElementById('places-list');
     if (placesList) {
@@ -196,14 +169,12 @@ document.addEventListener('DOMContentLoaded', () => {
             renderPlaces(places, maxPrice);
         });
     }
-
     // === Place & Review page logic ===
     const placeIdFromUrl = new URLSearchParams(window.location.search).get('id');
     const placeIdInput = document.getElementById('place-id');
     if (placeIdInput && placeIdFromUrl) {
         placeIdInput.value = placeIdFromUrl;
     }
-
     const placeDetails = document.getElementById('place-details');
     const reviewsContainer = document.getElementById('reviews');
     const addReviewSection = document.getElementById('add-review');
@@ -215,7 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
             addReviewSection.style.display = isLoggedIn ? 'block' : 'none';
         }
     }
-
     // === Review Form handling ===
     const reviewForm = document.getElementById('review-form');
     const reviewTextArea = document.getElementById('review');
@@ -228,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (addReviewSection) addReviewSection.style.display = 'none';
             return;
         }
-
         reviewForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -243,7 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Please fill out all fields.');
                 return;
             }
-
             try {
                 const response = await fetch('http://127.0.0.1:5000/api/v1/reviews', {
                     method: 'POST',
@@ -258,7 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         user_id: userId
                     })
                 });
-
                 const raw = await response.text();
                 let data;
                 try {
@@ -268,7 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Unexpected server response.');
                     return;
                 }
-
                 if (response.ok) {
                     alert('Review submitted successfully!');
                     reviewForm.reset();
